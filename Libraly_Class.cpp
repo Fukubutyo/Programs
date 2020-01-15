@@ -501,19 +501,6 @@ class SegmentTree{
 };
 
 
-#include<iostream>
-#include<algorithm>
-#include<string>
-#include<cstdlib>
-#include<map>
-#include<iomanip>
-#include<sstream>
-#include<vector>
-#include<stack>
-#include<queue>
-#include<math.h>
-using namespace std;
-
 
 //0-indexedの幅優先探索
 class BreadthFirstSearch
