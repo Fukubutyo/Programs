@@ -361,8 +361,9 @@ class Dijkstra{
 //ワーシャルフロイド
 class Warshall_Floyd{
 	public:
-	long long int **d;
-	Warshall_Floyd(long long int n) {		
+	long long int **d,nmemo;
+	Warshall_Floyd(long long int n) {	
+		nmemo=n;	
 		long long int **d=new long long int*[n];
 		for(int i=0;i<n;i++){
 			d[i]=new long long int [n];
@@ -370,6 +371,15 @@ class Warshall_Floyd{
 		for (int k = 0; k < n; k++) {
 			for (int i = 0; i < n; i++) {
 				for (int j = 0; j < n; j++) {
+					d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+				}
+			}
+		}
+	}
+	void Do_Warshall_Floyd() {		
+		for (int k = 0; k < nmemo; k++) {
+			for (int i = 0; i < nmemo; i++) {
+				for (int j = 0; j < nmemo; j++) {
 					d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
 				}
 			}
@@ -597,3 +607,92 @@ public:
         
 };
 
+
+//INFを宣言すること。Edgeに辺の情報を入れよう。
+class Graph{
+
+public:
+	vector<pair<long long int,long long int> > *Edge;
+	long long int MaxV,MaxE;
+	long long int *BellmanFordResult,*DijkstraResult,**WarshallFloydResult;
+	bool NegativeLoop=false;
+
+
+	Graph(long long int InputV,long long int InputE){
+		MaxV=InputV;
+		MaxE=InputE;
+		Edge=new vector<pair<long long int,long long int> >[InputV+1];
+
+	}
+	
+	void BellmanFord(long long int Start) {
+		BellmanFordResult=new long long int[MaxV];
+		for (int i = 0; i < MaxV; i++) { BellmanFordResult[i] = INF; }
+		BellmanFordResult[Start] = 0;
+		long long int turn=0;
+		while (true) {
+			turn++;
+			bool update = false;
+			for (int i = 0; i < MaxE; i++) {
+				for(int j=0;j<Edge[i].size();j++){
+					pair<long long int,long long int> e = Edge[i][j];
+					if (BellmanFordResult[i] != INF && BellmanFordResult[e.first] > BellmanFordResult[i] + e.second) {
+						BellmanFordResult[e.first] = BellmanFordResult[i] + e.second;
+						update = true;
+					}
+				}
+			}
+			if (!update) { 
+				NegativeLoop=false;
+				break; 
+			}
+			if(turn>=MaxV+1){
+				NegativeLoop=true;
+				break;
+			}
+		}
+	}
+
+	void Dijkstra(long long int Start) {
+		DijkstraResult=new long long int[MaxV];
+		priority_queue<pair<long long int,long long int>, vector<pair<long long int,long long int> >, greater<pair<long long int,long long int> > >que;
+		fill(DijkstraResult, DijkstraResult + MaxV, INF);
+		DijkstraResult[Start] = 0;
+		que.push(pair<long long int,long long int>(0, Start));
+
+		while (!que.empty()) {
+			pair<long long int,long long int> p = que.top();
+			que.pop();
+			long long int v = p.second;
+			if (DijkstraResult[v] < p.first)continue;
+			for (int i = 0; i < Edge[v].size(); i++) {
+				pair<long long int,long long int> e = Edge[v][i];
+				if (DijkstraResult[e.first] > DijkstraResult[v] + e.second) {
+					DijkstraResult[e.first] = DijkstraResult[v] + e.second;
+					que.push(pair<long long int,long long int>(DijkstraResult[e.first], e.first));
+				}
+			}
+		}
+	}
+
+	void WarshallFloyd() {
+		WarshallFloydResult=new long long int*[MaxV];
+		for(int i=0;i<MaxV;i++){
+			WarshallFloydResult[i]=new long long int[MaxV];
+		}
+		for(int i=0;i<MaxV;i++){
+			for(int j=0;j<Edge[i].size();j++){
+				WarshallFloydResult[i][Edge[i][j].first]=Edge[i][j].second;
+			}
+		}
+
+		for (int k = 0; k < MaxV; k++) {
+			for (int i = 0; i < MaxV; i++) {
+				for (int j = 0; j < MaxV; j++) {
+					WarshallFloydResult[i][j] = min(WarshallFloydResult[i][j], WarshallFloydResult[i][k] + WarshallFloydResult[k][j]);
+				}
+			}
+		}
+	}
+
+};
