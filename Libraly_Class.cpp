@@ -610,11 +610,17 @@ public:
 
 //INFを宣言すること。Edgeに辺の情報を入れよう。
 class Graph{
-
+//メンバ変数の説明
+//Edge:一つ目の番号が辺が出る方向
+//MaxV,MaxE:頂点数と辺の数
+//Result系:各メソッドの答え
+//InfinteUpdate:BellmanFordで各番号の頂点までの最短経路が更新されるか
+//
 public:
 	vector<pair<long long int,long long int> > *Edge;
 	long long int MaxV,MaxE;
 	long long int *BellmanFordResult,*DijkstraResult,**WarshallFloydResult;
+	bool *InfiniteUpdate;
 	bool NegativeLoop=false;
 
 
@@ -627,18 +633,26 @@ public:
 	
 	void BellmanFord(long long int Start) {
 		BellmanFordResult=new long long int[MaxV];
-		for (int i = 0; i < MaxV; i++) { BellmanFordResult[i] = INF; }
+		InfiniteUpdate=new bool[MaxV];
+		for (int i = 0; i < MaxV; i++) { BellmanFordResult[i] = INF;InfiniteUpdate[i]=false; }
 		BellmanFordResult[Start] = 0;
 		long long int turn=0;
 		while (true) {
 			turn++;
 			bool update = false;
-			for (int i = 0; i < MaxE; i++) {
+			for (int i = 0; i < MaxV; i++) {
 				for(int j=0;j<Edge[i].size();j++){
 					pair<long long int,long long int> e = Edge[i][j];
+					if(turn>=MaxV&&InfiniteUpdate[i])
+					{
+						InfiniteUpdate[e.first]=true;
+					}
 					if (BellmanFordResult[i] != INF && BellmanFordResult[e.first] > BellmanFordResult[i] + e.second) {
 						BellmanFordResult[e.first] = BellmanFordResult[i] + e.second;
 						update = true;
+						if(turn>=MaxV){
+							InfiniteUpdate[e.first]=true;
+						}
 					}
 				}
 			}
@@ -646,7 +660,7 @@ public:
 				NegativeLoop=false;
 				break; 
 			}
-			if(turn>=MaxV+1){
+			if(turn>=2*MaxV-1){
 				NegativeLoop=true;
 				break;
 			}
