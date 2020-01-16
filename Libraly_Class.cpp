@@ -749,4 +749,54 @@ public:
 			}
 		}
 	}
+    
+	void TopologicalSort(){
+		bool notupdate=false;
+		InEdge=new long long int[MaxV];
+		TopologicalSortdVertex.clear();
+		queue<long long int>task,firsttask;
+		for(int i=0;i<MaxV;i++){
+			InEdge[i]=0;
+		}
+		for(int i=0;i<MaxV;i++){
+			for(int j=0;j<Edge[i].size();j++){
+				InEdge[Edge[i][j].first]++;
+			}
+		}
+		for(int i=0;i<MaxV;i++){
+			if(InEdge[i]==0){
+				firsttask.push(i);
+			}
+
+		}
+		while(!firsttask.empty()){
+			long long int i=firsttask.front();
+			firsttask.pop();
+			TopologicalSortdVertex.push_back(i);			
+			InEdge[i]=-1;
+			for(int j=0;j<Edge[i].size();j++){
+				InEdge[Edge[i][j].first]--;
+				if(InEdge[Edge[i][j].first]==0){
+					task.push(Edge[i][j].first);
+				}
+			}
+			
+
+		}
+		while(!task.empty()){
+			long long int tmp=task.front();
+			TopologicalSortdVertex.push_back(tmp);
+			task.pop();
+			if(InEdge[tmp]==0){
+				InEdge[tmp]=-1;
+				for(int j=0;j<Edge[tmp].size();j++){
+					InEdge[Edge[tmp][j].first]--;
+					if(InEdge[Edge[tmp][j].first]==0){
+						task.push(Edge[tmp][j].first);
+					}
+				}
+			}
+			
+		}
+	}
 };
