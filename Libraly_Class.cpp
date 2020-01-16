@@ -516,94 +516,94 @@ class SegmentTree{
 class BreadthFirstSearch
 {
 public:
-        long long int **Used,**BFSResult;
-        char **HW;
-        long long int MaxH,MaxW;
-        stack<pair<long long int,long long int> >Root;
-        
-        BreadthFirstSearch(long long int H,long long int W){
-                MaxH=H;
-                MaxW=W;
-                HW= new char*[H+1];
-                Used= new long long int*[H+1];
-                BFSResult= new long long int*[H+1];
-                for(int i=0;i<H;i++)
-                {
-                        HW[i]= new char[W+1];
-                        Used[i]= new long long int[W+1];
-                        BFSResult[i]= new long long int[W+1];
-                }
-        }
-        
-        void DoBFS(pair<long long int,long long int>Start){
-                for(int i=0;i<MaxH;i++)
-                {
-                        for(int j=0;j<MaxW;j++)
-                        {
-                                Used[i][j]=0;
-                                BFSResult[i][j]=0;
-                        }
-                }
-                queue<pair<long long int,long long int> >task;
-                task.push(Start);
-                Used[Start.first][Start.second]=1;
-                
-                while(!task.empty())
-                {
-                        long long int h=task.front().first;
-                        long long int w=task.front().second;
-                        for(int i=-1;i<=1;i++)
-                        {
-                                for(int j=-1;j<=1;j++)
-                                {
-                                        if(h+i<0||w+j<0||h+i>=MaxH||w+j>=MaxW||i!=0&&j!=0)
-                                        {
-                                                continue;
-                                        }
-                                        if(Used[h+i][w+j]==0&&HW[h+i][w+j]=='.')
-                                        {
-                                                Used[h+i][w+j]=1;
-                                                BFSResult[h+i][w+j]=BFSResult[h][w]+1;
-                                                task.push({h+i,w+j});
-                                        }
-                                }
-                        }
-                        task.pop();
-                }
-        }
-        
-        void RootCheck(pair<long long int,long long int>Goal){
-                pair<long long int,long long int>now=Goal;
-                while(!Root.empty()){
-                        Root.pop();
-                }
-                Root.push(Goal);
-                while(BFSResult[now.first][now.second]!=0)
-                {
-                        bool key=false;
-                        for(int i=-1;i<=1;i++)
-                        {
-                                for(int j=-1;j<=1;j++)
-                                {
-                                        if(now.first+i<0||now.second+j<0||now.first+i>=MaxH||now.second+j>=MaxW||i!=0&&j!=0)
-                                        {
-                                                continue;
-                                        }
-                                        if(BFSResult[now.first+i][now.second+j]==BFSResult[now.first][now.second]-1&&HW[now.first+i][now.second+j]=='.')
-                                        {
-                                                Root.push({now.first+i,now.second+j});
-                                                key=true;
-                                                now={now.first+i,now.second+j};
-                                                break;
-                                        }
-                                }
-                                if(key)
-                                {
-                                        break;
-                                }
-                        }
-                }
-        }
+	long long int **Used,**BFSResult;
+	char **HW;
+	long long int MaxH,MaxW;
+	stack<pair<long long int,long long int> >Root;
+	
+	BreadthFirstSearch(long long int H,long long int W){
+			MaxH=H;
+			MaxW=W;
+			HW= new char*[H+1];
+			Used= new long long int*[H+1];
+			BFSResult= new long long int*[H+1];
+			for(int i=0;i<H;i++)
+			{
+					HW[i]= new char[W+1];
+					Used[i]= new long long int[W+1];
+					BFSResult[i]= new long long int[W+1];
+			}
+	}
+	
+	void DoBFS(pair<long long int,long long int>Start){
+		for(int i=0;i<MaxH;i++)
+		{
+			for(int j=0;j<MaxW;j++)
+			{
+				Used[i][j]=0;
+				BFSResult[i][j]=0;
+			}
+		}
+		queue<pair<long long int,long long int> >task;
+		task.push(Start);
+		Used[Start.first][Start.second]=1;
+		
+		while(!task.empty())
+		{
+			long long int h=task.front().first;
+			long long int w=task.front().second;
+			for(int i=-1;i<=1;i++)
+			{
+				for(int j=-1;j<=1;j++)
+				{
+					if(h+i<0||w+j<0||h+i>=MaxH||w+j>=MaxW||i!=0&&j!=0)
+					{
+							continue;
+					}
+					if(Used[h+i][w+j]==0&&HW[h+i][w+j]=='.')
+					{
+							Used[h+i][w+j]=1;
+							BFSResult[h+i][w+j]=BFSResult[h][w]+1;
+							task.push({h+i,w+j});
+					}
+				}
+			}
+			task.pop();
+		}
+	}
+	
+	void RootCheck(pair<long long int,long long int>Goal){
+		pair<long long int,long long int>now=Goal;
+		while(!Root.empty()){
+			Root.pop();
+		}
+		Root.push(Goal);
+		while(BFSResult[now.first][now.second]!=0)
+		{
+			bool key=false;
+			for(int i=-1;i<=1;i++)
+			{
+				for(int j=-1;j<=1;j++)
+				{
+					if(now.first+i<0||now.second+j<0||now.first+i>=MaxH||now.second+j>=MaxW||i!=0&&j!=0)
+					{
+						continue;
+					}
+					if(BFSResult[now.first+i][now.second+j]==BFSResult[now.first][now.second]-1&&HW[now.first+i][now.second+j]=='.')
+					{
+						Root.push({now.first+i,now.second+j});
+						key=true;
+						now={now.first+i,now.second+j};
+						break;
+					}
+				}
+				if(key)
+				{
+					break;
+				}
+			}
+		}
+	}
         
 };
 
@@ -618,10 +618,13 @@ class Graph{
 //
 public:
 	vector<pair<long long int,long long int> > *Edge;
+	vector<pair<pair<long long int,long long int>,long long int> >PrimEdge;
 	long long int MaxV,MaxE;
 	long long int *BellmanFordResult,*DijkstraResult,**WarshallFloydResult;
 	bool *InfiniteUpdate;
 	bool NegativeLoop=false;
+	long long int PrimResult=0;
+	bool NotConected=false;
 
 
 	Graph(long long int InputV,long long int InputE){
@@ -708,5 +711,44 @@ public:
 			}
 		}
 	}
-
+	void Prim(){
+		NotConected=false;
+		priority_queue<pair<long long int,pair<long long int,long long int> >,vector<pair<long long int,pair<long long int,long long int> > > ,greater<pair<long long int,pair<long long int,long long int> > > >PriorityEdge;
+		bool *IncludedVertex=new bool[MaxV];
+		fill(IncludedVertex,IncludedVertex+MaxV,false);
+		PrimEdge.clear();
+		for(int i=0;i<Edge[0].size();i++)
+		{
+			PriorityEdge.push({Edge[0][i].second,{0,Edge[0][i].first}});
+		}
+		IncludedVertex[0]=true;
+		for(int i=0;i<MaxV-1;i++)
+		{
+			while(1)
+			{
+				if(PriorityEdge.empty())
+				{
+					NotConected=true;
+					break;
+				}
+				pair<long long int,pair<long long int,long long int> > pe = PriorityEdge.top();
+				PriorityEdge.pop();
+				//cout<<pe.first<<" "<<pe.second.first<<" "<<pe.second.second<<endl;
+				if(!IncludedVertex[pe.second.second])
+				{
+					IncludedVertex[pe.second.second]=true;
+					PrimResult+=pe.first;
+					PrimEdge.push_back({pe.second,pe.first});
+					//cout<<"size"<<pe.second.second<<" "<<Edge[pe.second.second].size()<<endl;
+					for(int j=0;j<Edge[pe.second.second].size();j++)
+					{
+						PriorityEdge.push({Edge[pe.second.second][j].second,{pe.second.second,Edge[pe.second.second][j].first}});
+					}
+					break;
+				}
+					
+					
+			}
+		}
+	}
 };
