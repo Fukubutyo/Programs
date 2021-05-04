@@ -40,49 +40,52 @@ class Euclid_Gojyohou{
 
 class Extend_Euclid_Gojyohou{
     public:
-    long long int memo[2000]={},GCD;
-    long long int keisuu[2000]={};
-    long long int gcd(long long int a, long long int b) {
-        memo[0]=a;
-        keisuu[0]=1;
-        memo[1]=b;
+    long long int Memo[200]={},GCD,Now=1;
+    long long int Keisuu[200]={};
+    bool SwapMemo=false;
+    pair<long long int,long long int> RunEEG(long long int a, long long int b) {
+        if(a<b){
+            SwapMemo=true;
+            swap(a,b);
+        }
+        if(a%b==0){
+            if(SwapMemo){
+                return{1,0};
+            }else{
+                return{0,1};
+            }
+        }
+        for(long long int i = 0; i < 100; i++){
+            Memo[i]=0;
+            Keisuu[i]=0;
+        }
+        Memo[0]=a;
+        Memo[1]=b;
+        Now=1;
         
-        long long int tmp,count=2,p,q;
-        long long int r = 1;
-        if (b > a) {
-            tmp = a;
-            a = b;
-            b = tmp;
+        while (Memo[Now-1]%Memo[Now]!=0)
+        {
+            Now++;
+            Memo[Now]=Memo[Now-2]%Memo[Now-1];
         }
-        r = a % b;
-        memo[2]=r;
-        keisuu[1]=-(a/b);
-        while (r != 0) {
+        Now--;
 
+        Keisuu[Now-1]=1;
+        Keisuu[Now]=-Memo[Now-1]/Memo[Now];
+        
+        while (Now>=2)
+        {
+            Now--;
+            Keisuu[Now]+=(-Keisuu[Now+1]*(Memo[Now-1]/Memo[Now]));
+            Keisuu[Now-1]=Keisuu[Now+1];
+            //cout<<Now<<endl;
+        }
 
-            a = b;
-            b = r;
-            r = a % b;
-                
-            memo[count+1]=r;
-            keisuu[count]=-(a/b);
-            count++;
+        if(SwapMemo){
+            return{Keisuu[1],Keisuu[0]};
+        }else{
+            return{Keisuu[0],Keisuu[1]};
         }
-        GCD=b;
-        count-=2;
-        p=1;
-        q=keisuu[count];
-        if(q>=0)cout<<p<<"*"<<memo[count-1]<<"+"<<q<<"*"<<memo[count]<<"="<<GCD<<endl;
-        else{cout<<p<<"*"<<memo[count-1]<<q<<"*"<<memo[count]<<"="<<GCD<<endl;}
-        for(int i=count-1;i>=1;i--){
-            long long int tmptmp=p;
-            p=q;
-            q=tmptmp+q*keisuu[i];
-            if(q>0)cout<<p<<"*"<<memo[i-1]<<"+"<<q<<"*"<<memo[i]<<"="<<GCD<<endl;
-            else{cout<<p<<"*"<<memo[i-1]<<q<<"*"<<memo[i]<<"="<<GCD<<endl;}
-        }
-        //cout<<p<<"*"<<memo[0]<<"+"<<q<<"*"<<memo[1]<<"="<<GCD;
-        return b;
     }
 };
 
@@ -101,6 +104,7 @@ class Kaizyou{
 
     long long int kai(long long int a, long long int b, long long int mod) {
         long long int tmp = 1;
+		kaizyou[0]=1;
         for (long long int i = a; i <= b; i++) {
             tmp *= i;
             tmp %= mod;
@@ -110,34 +114,19 @@ class Kaizyou{
         return tmp;
     }
 };
-
 //累乗(繰り返し2乗法)　aのb乗(mod)を求める。
 class Ruizyou{
     public:
     long long int rui(long long int a, long long int b, long long mod) {
-        int memo[65] = {};
-        long long int A[65] = {};
-        long long int tmp = 1;
-        for (int i = 0; i < 65; i++) {
-            memo[i] = b % 2;
-            b /= 2;
-        }
-
-        A[0] = a;
-        A[0] %= mod;
-
-        for (int i = 1; i < 65; i++) {
-            A[i] = A[i - 1] * A[i - 1];
-            A[i] %= mod;
-        }
-        for (int i = 0; i < 65; i++) {
-            if (memo[i] == 1) {
-                tmp *= A[i];
-                tmp %= mod;
+        long long int r=1;
+        while(b>0){
+            if(1&b){
+                r=(r*a)%mod;
             }
+            a=(a*a)%mod;
+            b=(b>>1);
         }
-        tmp %= mod;
-        return tmp;
+        return r;
     }
 };
 //コンビネーション計算
@@ -145,19 +134,180 @@ class Combination{
     public:
         Kaizyou * Kaizyou_Instance;
         Ruizyou Ruizyou_Instance;
+		long long int CombinationMod;
     Combination(long long int n,long long int mod){
         Kaizyou_Instance=new Kaizyou(n,mod);
+		CombinationMod=mod;
     }
-    long long int comb(long long int n, long long int r, long long int mod) {
+    long long int comb(long long int n, long long int r) {
         long long int tmp;
-
-        tmp = (Kaizyou_Instance->kaizyou[n] * Ruizyou_Instance.rui(Kaizyou_Instance->kaizyou[r], mod - 2, mod)) % mod;
-        tmp *= Ruizyou_Instance.rui(Kaizyou_Instance->kaizyou[n - r], mod - 2, mod);
-        tmp %= mod;
-        if (tmp < 0) { tmp = (mod - tmp) % mod; }
+		if(r>n){return 0;}
+        tmp = (Kaizyou_Instance->kaizyou[n] * Ruizyou_Instance.rui(Kaizyou_Instance->kaizyou[r], CombinationMod - 2, CombinationMod)) % CombinationMod;
+        tmp *= Ruizyou_Instance.rui(Kaizyou_Instance->kaizyou[n - r], CombinationMod - 2, CombinationMod);
+        tmp %= CombinationMod;
+        if (tmp < 0) { tmp = (CombinationMod - tmp) % CombinationMod; }
         return tmp;
     }
+	//start~endまでのn+iCiの和を出力
+	long long int combRange1(long long int n,long long int start,long long int end){
+		if(start!=0)return (comb(n+end+1,end)-comb(n+start,start-1)+3*CombinationMod)%CombinationMod;
+		else return comb(n+end+1,end)%CombinationMod;
+	}
+	//start1~end1のiとstart2~end2のjまでのi+jCiの和を出力
+	long long int combRange2(long long int start1,long long int end1,long long int start2,long long int end2){
+		return (comb(end1+end2+2,end1+1)-comb(end1+start2+1,start2)-comb(end2+start1+1,start1)+comb(start1+start2,start1)+5*CombinationMod)%CombinationMod;		
+	}
+	
+	long long int Lucas(long long int n,long long int r){
+        long long int ret=1;
+        while(r!=0){
+            ret*=comb(n%CombinationMod,r%CombinationMod);
+            n/=CombinationMod;
+            r/=CombinationMod;
+        }
+        return ret%CombinationMod;
+    }
 };	
+
+
+
+//行列累乗.実行前にgyouretuKouseiを実行すること
+class gyouretuRuizyou{
+    public:
+    long long int ***gyouretu;
+    long long int **gyouretuRes,**gyouretuTmp;
+    long long int *kitei,*kiteiRes;
+    long long int gyouretuMod,gyouretuSize,ruiMax;
+    gyouretuRuizyou(long long int inputGyouretuSize,long long int inputRui,long long int inputMod){
+        gyouretu=new long long int**[inputRui+1];
+        kitei=new long long int[inputGyouretuSize];
+        kiteiRes=new long long int[inputGyouretuSize];
+        gyouretuRes=new long long int*[inputGyouretuSize];
+        gyouretuTmp=new long long int*[inputGyouretuSize];
+
+        for (long long int i = 0; i <= inputRui; i++)
+        {
+            gyouretu[i]=new long long int*[inputGyouretuSize];
+            for (long long int j = 0; j < inputGyouretuSize; j++)
+            {
+                gyouretu[i][j]=new long long int[inputGyouretuSize];
+            }
+            
+        }
+
+        for (long long int i = 0; i < inputGyouretuSize; i++)
+        {
+            gyouretuRes[i]=new long long int[inputGyouretuSize];
+            gyouretuTmp[i]=new long long int[inputGyouretuSize];
+        }
+        ruiMax=inputRui;
+        gyouretuMod=inputMod;
+        gyouretuSize=inputGyouretuSize;
+        return ;
+    }
+
+    long long int inputGyouretuData(long long int inputI,long long int inputJ,long long int inputData){
+        gyouretu[0][inputI][inputJ]=inputData;
+        return 0;
+    }
+
+    long long int inputKiteiData(long long int inputI,long long int inputData){
+        kitei[inputI]=inputData;
+        return 0;
+    }
+
+    long long int gyouretuKousei(){
+        for (long long int i = 1; i <= ruiMax; i++)
+        {
+            for (long long int j = 0; j < gyouretuSize; j++)
+            {
+                for (long long int k = 0; k < gyouretuSize; k++)
+                {
+                    gyouretu[i][j][k]=0;
+                    for (long long int p = 0; p < gyouretuSize; p++)
+                    {
+                        gyouretu[i][j][k]+=gyouretu[i-1][j][p]*gyouretu[i-1][p][k];
+                        gyouretu[i][j][k]%=gyouretuMod;
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        return 0;
+    }
+    long long int doGyouretuRuizyou(long long int inputRui){
+        
+        for (long long int i = 0; i < gyouretuSize; i++)
+        {
+            
+            for (long long int j = 0; j < gyouretuSize; j++)
+            {
+                
+                if(i==j){
+                    gyouretuRes[i][j]=1;
+                }else{
+                    gyouretuRes[i][j]=0;
+                }
+                
+            }
+            
+        }
+        
+        for (long long int i = 0; i <= ruiMax; i++)
+        {
+            if(inputRui%2==1){
+                for (long long int j = 0; j < gyouretuSize; j++)
+                {
+                
+                   for (long long int k = 0; k < gyouretuSize; k++)
+                   {
+                       gyouretuTmp[j][k]=0;
+                       for (long long int p = 0; p < gyouretuSize; p++)
+                       {
+                           gyouretuTmp[j][k]+=gyouretuRes[j][p]*gyouretu[i][p][k];
+                           gyouretuTmp[j][k]%=gyouretuMod;
+                       }
+                   }
+                   
+                }
+
+                for (long long int j = 0; j < gyouretuSize; j++)
+                {
+                
+                   for (long long int k = 0; k < gyouretuSize; k++)
+                   {
+                       gyouretuRes[j][k]=gyouretuTmp[j][k];
+                   }
+                   
+                }
+                
+            }
+
+            inputRui/=2;
+        }
+
+        
+        for (long long int i = 0; i < gyouretuSize; i++)
+        {
+            kiteiRes[i]=0;
+            for (long long int j = 0; j < gyouretuSize; j++)
+            {
+                kiteiRes[i]+=gyouretuRes[i][j]*kitei[j];
+                kiteiRes[i]%=mod;
+            }
+            
+        }
+        
+        return 0;
+    }
+
+
+
+};
+
+
 
 //素数判定　素数ならそのまま返す　合成数なら０を返す。
 class Sosu{
@@ -176,12 +326,14 @@ class Union_Find{
 	public:
 	Union_Find(int MAX){
 		par =new long long int[MAX+1];
-		
+		size =new long long int[MAX+1];
 		for (int i = 0; i < MAX; i++) {
 			par[i] = i;
+            size[i]=1;
 		}
 	}
 	long long int * par;
+    long long int * size;
 		//木の根を求める
 	int unifind_root(int x) {
 		if (par[x] == x) {
@@ -196,16 +348,17 @@ class Union_Find{
 		return unifind_root(x) == unifind_root(y);
 	}
 		//グループ併合
-	int unifind_unite(int x, int y) {
+	void unifind_unite(int x, int y) {
 		x = unifind_root(x);
 		y = unifind_root(y);
 		if (x == y) {
-			return 0;
+			return ;
 		}
 		par[x] = y;
+        size[y] +=size[x];
+        return;
 	}
 };
-
 //CRT(中国式剰余定理)
 class ChineseRemainderTheorem{
 	public:
@@ -489,6 +642,7 @@ class SegmentTree{
         treeData[id]=Calculation(treeData[2*id],treeData[2*id+1]);
         if(id==1){return 0;}
         DataChangeLoop(id/2);
+		return 0;
     }
 
 	long long int Calculation(long long int x,long long int y){
@@ -604,7 +758,18 @@ public:
 			}
 		}
 	}
-        
+	~BreadthFirstSearch(){
+	for(int i=0;i<MaxH;i++)
+	{
+			free(HW[i]);
+			free(Used[i]);
+			free(BFSResult[i]);
+	}
+	free(HW);
+	free(Used);
+	free(BFSResult);
+	}
+       
 };
 
 
@@ -619,13 +784,17 @@ class Graph{
 public:
 	vector<pair<long long int,long long int> > *Edge;
 	vector<pair<pair<long long int,long long int>,long long int> >PrimEdge;
+	vector<pair<pair<long long int,long long int>,long long int> >*FlowEdge;
+	
+    long long int *InEdge;
 	long long int MaxV,MaxE;
-	long long int *BellmanFordResult,*DijkstraResult,**WarshallFloydResult;
+	long long int *BellmanFordResult,*DijkstraResult,**WarshallFloydResult,*BFSResult;
+	vector<long long int>TopologicalSortdVertex;
 	bool *InfiniteUpdate;
 	bool NegativeLoop=false;
 	long long int PrimResult=0;
 	bool NotConected=false;
-
+    bool *FlowUsed;
 
 	Graph(long long int InputV,long long int InputE){
 		MaxV=InputV;
@@ -634,6 +803,27 @@ public:
 
 	}
 	
+	void BFS(long long int Start){
+		BFSResult=new long long int[MaxV];
+		for (long long int i = 0; i < MaxV; i++)
+		{
+			BFSResult[i]=INF;
+		}
+		BFSResult[Start]=0;
+		queue<long long int>que;
+		que.push(Start);
+		while(!que.empty()){
+			for (long long int i = 0; i < Edge[que.front()].size(); i++)
+			{
+				if(BFSResult[Edge[que.front()][i].first]==INF){
+					BFSResult[Edge[que.front()][i].first]=BFSResult[que.front()]+1;
+					que.push(Edge[que.front()][i].first);
+				}
+			}
+			
+		}
+	}
+
 	void BellmanFord(long long int Start) {
 		BellmanFordResult=new long long int[MaxV];
 		InfiniteUpdate=new bool[MaxV];
@@ -697,6 +887,12 @@ public:
 		for(int i=0;i<MaxV;i++){
 			WarshallFloydResult[i]=new long long int[MaxV];
 		}
+		for (int k = 0; k < MaxV; k++) {
+			for (int i = 0; i < MaxV; i++) {
+				WarshallFloydResult[k][i] = INF;
+				
+			}
+		}
 		for(int i=0;i<MaxV;i++){
 			for(int j=0;j<Edge[i].size();j++){
 				WarshallFloydResult[i][Edge[i][j].first]=Edge[i][j].second;
@@ -749,7 +945,7 @@ public:
 			}
 		}
 	}
-    
+    //おそらく未完成なトポロジカルソート
 	void TopologicalSort(){
 		bool notupdate=false;
 		InEdge=new long long int[MaxV];
@@ -799,4 +995,154 @@ public:
 			
 		}
 	}
+    //これを最初に記述
+    void NetworkFlow(){
+        FlowEdge=new vector<pair<pll,long long int> >[MaxV];
+        FlowUsed=new bool[MaxV];
+        for (long long int i = 0; i < MaxV; i++)
+        {
+            FlowUsed[i]=false;
+        }
+        
+    }
+    void NetworlFlowAddEdge(long long int from,long long int to,long long int cap){
+        FlowEdge[from].push_back({{to,cap},FlowEdge[to].size()});
+        FlowEdge[to].push_back({{from,0},FlowEdge[from].size()-1});
+    }
+    long long int Flowdfs(long long int v,long long int t,long long int f){
+        if(v==t){return f;}
+        FlowUsed[v]=true;
+        for (long long int i = 0; i < FlowEdge[v].size(); i++)
+        {
+            pair<pll,long long int> &e=FlowEdge[v][i];
+            if(!FlowUsed[e.first.first]&&e.first.second>0){
+                long long int d=Flowdfs(e.first.first,t,min(f,e.first.second));
+                if(d>0){
+                    e.first.second-=d;
+                    FlowEdge[e.first.first][e.second].first.second+=d;
+                    return d;
+                }
+            }
+        }
+        return 0;
+    }
+    long long int MaxFlow(long long int s,long long int t){
+        long long int flow=0;
+        for (;;)
+        {
+            for (long long int i = 0; i < MaxV; i++)
+            {
+                FlowUsed[i]=false;
+            }
+            
+            long long int f=Flowdfs(s,t,INF);
+            
+            if(f==0){return flow;}
+            flow+=f;
+        }
+        
+    }
 };
+
+class LCS{
+    public:
+    long long int **dp;
+    long long int **longest;
+    long long int result;
+    string LCSstr;
+    LCS(long long int one,long long int two){
+        dp=new long long int*[one];
+        longest=new long long int *[one];
+        for(int i=0;i<one;i++){
+            dp[i]=new long long int[two];
+            longest[i]=new long long int[two];
+        } 
+    }
+    void DoLCS(string str1,string str2){
+        LCSstr.clear();
+        for(int i=0;i<str1.length();i++){
+            for(int j=0;j<str2.length();j++){
+                dp[i][j]=0;
+                longest[i][j]=0;
+            }
+            
+        }
+
+        for(int i=0;i<str1.length();i++){
+            if(str1[i]==str2[0]){dp[i][0]=1;}
+            else{dp[i][0]=0;}
+            for(int j=1;j<str2.length();j++){
+                if(i!=0)dp[i][j]=longest[i-1][j-1];
+                if(str1[i]==str2[j]){dp[i][j]++;}
+            }
+            
+            if(i!=0){
+                longest[i][0]=max({longest[i-1][0],dp[i][0]});
+                for(int j=1;j<str2.length();j++){
+                    longest[i][j]=max({longest[i-1][j],dp[i][j],longest[i][j-1]});
+                }
+            }else{
+                longest[0][0]=dp[i][0];
+                for(int j=1;j<str2.length();j++){
+                    longest[0][j]=max({dp[0][j],longest[0][j-1]});
+                }
+            }
+        }
+
+        pair<long long int ,long long int>rev;
+        rev={str1.length(),str2.length()};
+        long long int now=longest[str1.length()-1][str2.length()-1];
+        bool key=false;
+        //cout<<now<<endl;
+        //DEBUG_OUTPUT_ARRAY2_BOX(dp,rev.first,rev.second);
+        while(now!=0){
+            key=false;
+            for(int j=0;j<rev.first;j++){
+                if(now==dp[j][rev.second-1]&&(now-1==longest[max(j-1,0)][max(rev.second-1-1,0LL)]||j==0||rev.second-1==0)){
+                    
+                    LCSstr.push_back(str1[j]);
+                    rev={j,rev.second-1};
+                    now--;
+                    key=true;
+                    //cout<<"REV>>"<<rev.first<<" "<<rev.second<<endl;
+                    break;
+                }
+            }
+            if(key){continue;}
+            for(int j=0;j<rev.second;j++){
+                if(now==dp[rev.first-1][j]&&(now-1==longest[max(rev.first-1-1,0LL)][max(j-1,0)]||rev.first-1==0||j==0)){
+                    now--;
+                    LCSstr.push_back(str2[j]);
+                    rev={rev.first-1,j};
+                    key=true;
+                    
+                    //cout<<"REV>>"<<rev.first<<" "<<rev.second<<endl;
+                    break;
+                }
+            }
+            if(!key){
+                rev={rev.first-1,rev.second-1};
+            }        
+        }
+        reverse(LCSstr.begin(),LCSstr.end());
+        result=LCSstr.length();
+    }
+    ~LCS(){}
+};
+
+//自分以下の数で自分と互いに素なものの個数を出力O(√N)
+long long int EularTotientFunction(long long int Input){
+    long long int InputCopy=Input;
+    for(long long int i = 2; i*i <= Input; i++){
+        if(Input%i==0){
+            while(Input%i==0){
+                Input/=i;
+            }
+            InputCopy=InputCopy*(i-1)/i;
+        }
+    }
+    if(Input!=1){
+        InputCopy=InputCopy*(Input-1)/Input;
+    }
+    return InputCopy;
+}
